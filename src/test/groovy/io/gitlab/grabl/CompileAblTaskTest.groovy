@@ -1,22 +1,25 @@
 package io.gitlab.grabl
 
-import org.gradle.testfixtures.ProjectBuilder
-
-import java.nio.file.attribute.AclFileAttributeView
-
 import org.gradle.api.AntBuilder
 import org.gradle.api.Project
+import org.gradle.testfixtures.ProjectBuilder
+
 import spock.lang.Specification
 
 
 class CompileAblTaskTest extends Specification {
     Project project
     AntBuilder ant
+    GrablExtension extension
+    CompileAblTask task
 
     void setup() {
         project = ProjectBuilder.builder().build()
         ant = GroovyMock()
         project.ant = ant
+        project.extensions.create(GrablExtension.NAME, GrablExtension, project)
+        extension = project.extensions.getByType(GrablExtension)
+        task = createTask()
     }
 
     CompileAblTask createTask(String name = 'compileAbl') {
@@ -25,28 +28,109 @@ class CompileAblTaskTest extends Specification {
 
     def "it can be added to a project"() {
         when: "the task is added to the project"
-        def task = project.task('compileAbl', type: CompileAblTask)
+        def compileTask = project.task('compileAblTask', type: CompileAblTask)
 
         then: "task is an instance of CompileAblTask class"
-        task instanceof CompileAblTask
+        compileTask instanceof CompileAblTask
     }
 
-    def "it has default values for properties"() {
-        given: "an instance of the CompileAblTask"
-        def compile = createTask()
-
-        expect: "default values"
+    def "it has default values for properties based on extension"() {
+        expect: "default values to delegate to extension"
         // from AbstractCompile
-        compile.destinationDir == null
-        compile.source.isEmpty()
-        compile.propath == null
-        compile.dbConnections.isEmpty()
-        compile.compileArgs == [:]
+        task.destinationDir == extension.rcodeDir
+        task.source.isEmpty()
+        task.propath == extension.propath
+        task.dbConnections.isEmpty()
+        task.compileArgs == [:]
+
+        when: "extension properties are changed"
+        extension.rcodeDir = "${project.buildDir}/newRcode"
+        extension.propath = project.files('src')
+        extension.dbConnections('foodb')
+        extension.pctTaskArgs.listing = true
+
+        then: "task properties change too"
+        task.destinationDir == extension.rcodeDir
+        task.propath == extension.propath
+        task.dbConnections.contains('foodb')
+        task.compileArgs?.listing == true
     }
+
+    def "task properties can be changed without affecting extension properties"() {
+        given: "a fresh instance GrablExtension"
+        GrablExtension defExtension = new GrablExtension(project)
+
+        when: "task properties are changed"
+        task.destinationDir = project.file('rcode')
+        task.propath = project.files('src')
+        task.dbConnections << 'foodb'
+        task.compileArgs.listing = true
+
+        then: "extension properties are not affected"
+        extension.rcodeDir == defExtension.rcodeDir
+        extension.propath.files == defExtension.propath.files
+        extension.dbConnections == defExtension.dbConnections
+        extension.pctTaskArgs == defExtension.pctTaskArgs
+    }
+
+    def "property values on task take precedence over extension"() {
+        when: "a task property is reset and same extension property is changed"
+        task.destinationDir = project.file('rcode')
+        task.propath = project.files('src')
+        extension.rcodeDir = "${project.buildDir}/newRcode"
+        extension.propath = project.files('ablsrc')
+
+        then: "task property stays with its reset value"
+        task.destinationDir == project.file('rcode')
+        task.propath.files == project.files('src').files
+    }
+
+    def "selected property values are merged from extension and task"() {
+        when: "List or Map properties are modified on both extension and the task"
+        task.dbConnections << 'foodb'
+        extension.dbConnections('bardb')
+        extension.pctTaskArgs.listing = true
+        task.compileArgs.preprocess = true
+
+        then: "both modifications apply (merge)"
+        task.dbConnections.contains('foodb')
+        task.dbConnections.contains('bardb')
+        task.compileArgs?.listing == true
+        task.compileArgs?.preprocess == true
+    }
+
+    def "merged property values from extension still apply after task property is cleared or reassigned"() {
+        given: "an extension with defaults"
+        extension.dbConnections('foodb')
+        extension.pctTaskArgs.listing = true
+
+        when: "a Collection property is modified, then cleared on task"
+        task.dbConnections << 'bardb'
+        task.dbConnections.clear()
+        task.compileArgs.preprocess = true
+        task.compileArgs.clear()
+
+        then: "defaults from extension still apply"
+        task.dbConnections.contains('foodb')
+        task.compileArgs?.listing == true
+
+        when: "a Collection property is reassigned on a task"
+        task.dbConnections = [] as Set
+        task.compileArgs = [:]
+
+        then: "defaults from extension still apply"
+        task.dbConnections.contains('foodb')
+        task.compileArgs?.listing == true
+    }
+
+    //    def "inheritance of certain properties from extension can be disabled"() {
+    //        // TODO: is this needed?
+    //        when: "inheritance of certain properties is disabled"
+    //        then: "modifications on extension have no effect"
+    //    }
 
     def "compile action creates resources necessary to compile using PCT"() {
-        given: "a project with AntBuilder and an instance of CompileAblTask"
-        def task = createTask()
+        given: "an instance of CompileAblTask with a set destinationDir"
         task.destinationDir = project.file('destDir')
 
         // define all expected interactions here so we don't have to repeat the
@@ -99,8 +183,7 @@ class CompileAblTaskTest extends Specification {
     }
 
     def "compiler args are passed to PCTCompile"() {
-        given: "a project with AntBuilder and an instance of CompileAblTask"
-        def task = createTask()
+        given: "an instance of CompileAblTask with a set destinationDir"
         task.destinationDir = project.file('destDir')
 
         when: "compiler args are populated"
@@ -126,12 +209,11 @@ class CompileAblTaskTest extends Specification {
      * FileSet so make sure this is the way it's done.
      */
     def "compile adds fileset resources to PCTCompile task"() {
-        given: "a project with AntBuilder, some sources and an instance of CompileAblTask"
+        given: "an instance of CompileAblTask with a set destinationDir and some sources"
         project.files('src', 'src/mod1', 'src/mod2').files*.mkdir()
         project.files('src/top.p', 'src/mod1/foo.p', 'src/mod2/bar.p').
             files*.write('')
 
-        def task = createTask()
         task.destinationDir = project.file('destDir')
 
         1 * ant.PCTCompile(_, _ as Closure) >> { p, Closure configClosure ->
@@ -174,8 +256,7 @@ class CompileAblTaskTest extends Specification {
      * If more are needed {@code -h NUM} option needs to be passed.
      */
     def "compile handles cases with >5 databases"() {
-        given: "an instance of CompileAblTask"
-        def task = createTask()
+        given: "an instance of CompileAblTask with a set destinationDir"
         task.destinationDir = project.file('destDir')
 
         1 * ant.PCTCompile(_, _ as Closure) >> { p, Closure c ->
