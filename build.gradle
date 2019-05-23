@@ -13,7 +13,7 @@ plugins {
     id 'com.gradle.build-scan' version '2.3'
     id 'me.champeau.buildscan-recipes' version '0.2.3'
     id 'java-gradle-plugin'
-    id 'com.gradle.plugin-publish' version '0.9.9'
+    id 'com.gradle.plugin-publish' version '0.10.1'
     id 'nebula.release' version '6.3.5'
     id "com.bmuschko.clover" version "2.2.3"
 }
@@ -103,6 +103,7 @@ pluginBundle {
     tags = ['abl', 'pct']
 }
 
+
 pluginList.each { plugin ->
     // Configuration for the `java-gradle-plugin` plugin
     // https://docs.gradle.org/4.3.1/userguide/javaGradle_plugin.html
@@ -115,18 +116,6 @@ pluginList.each { plugin ->
         }
     }
 
-    // Configuration for the `com.gradle.plugin-publish` plugin
-    // https://plugins.gradle.org/docs/publish-plugin
-    // https://guides.gradle.org/publishing-plugins-to-gradle-plugin-portal/
-    pluginBundle {
-        plugins {
-            create(plugin.id) {
-                id = plugin.id
-                displayName = plugin.displayName
-                description = plugin.displayName
-            }
-        }
-    }
 }
 
 postRelease.dependsOn(publishPlugins)
