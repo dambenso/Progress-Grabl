@@ -7,8 +7,9 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.Internal
 
-class LoadSchema extends SourceTask {
+class LoadSchema extends BaseGrablSourceTask {
 
     @Input
     String refid
@@ -29,6 +30,9 @@ class LoadSchema extends SourceTask {
     def loadSchema() {
         Map args =[:]
 
+        if (dlcHome)
+            args.put("dlcHome", dlcHome.path)
+
         args.put('unfreeze', unfreeze)
         args.put('onlineChanges', onlineChanges)
         args.put('commitWhenErrors', commitWhenErrors)
@@ -47,8 +51,5 @@ class LoadSchema extends SourceTask {
             this.source.addToAntBuilder(delegate, null, AntType.FileSet)
         }
     }
-
-     protected GrablExtension getExt() {
-        return project.extensions.getByType(GrablExtension)
-    }    
+   
 }

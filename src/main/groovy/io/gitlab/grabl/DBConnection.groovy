@@ -5,6 +5,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.Internal
 
 class DBConnection extends DefaultTask {
 
@@ -54,6 +55,40 @@ class DBConnection extends DefaultTask {
     @Input @Optional 
     String id = null
 
+    @Internal
+    List<DBAlias> aliases = []  
+
+    DBConnection () {
+        setAliases([] as List)
+    }
+
+    public List<DBAlias> getAliases() {
+        return aliases
+    }
+
+    
+
+    /**
+        add an alias to a database connection
+    */
+    public DBConnection alias(String name, Closure configureClosure) {
+        def alias = new DBAlias()
+        alias.name = name
+        if (configureClosure) {
+            alias.with(configureClosure)
+        }
+        this.aliases << alias
+        this
+    }
+
+    /**
+        add an alias to a database connection
+    */
+    public DBConnection alias(String name) {
+        this.alias(name) {}
+        this
+    }    
+
     @TaskAction
     def connect() {
         Map args =[:]
@@ -76,10 +111,17 @@ class DBConnection extends DefaultTask {
 
         def inpParam = args.findAll {it.value != null}
 
-        ant.DBConnection(*:inpParam)
+        // happily abusing nested constructs using ant builder
+        // for reference: https://alvinalexander.com/java/jwarehouse/groovy/src/test/groovy/util/AntTest.groovy.shtml
+        ant.DBConnection(*:inpParam) {
+            this.aliases.each {
+                ant.PCTAlias([name : it.name, noError : it.noError])
+            }
+        }
     }
-
-     protected GrablExtension getExt() {
+ 
+    @Internal
+    protected GrablExtension getExt() {
         return project.extensions.getByType(GrablExtension)
-    }    
+    } 
 }
