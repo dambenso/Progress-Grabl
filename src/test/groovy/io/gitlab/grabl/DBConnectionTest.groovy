@@ -1,5 +1,5 @@
 // Copyright © 2019 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
-package io.gitlab.grabl
+package oe.espresso.latte
 
 import org.gradle.api.AntBuilder
 import org.gradle.api.InvalidUserDataException
@@ -12,15 +12,15 @@ import spock.lang.Specification
 class DBConnectionTest extends Specification {
     Project project
     AntBuilder ant
-    GrablExtension extension
+    LatteExtension extension
     DBConnection task
 
     void setup() {
         project = ProjectBuilder.builder().build()
         ant = GroovyMock()
         project.ant = ant
-        project.extensions.create(GrablExtension.NAME, GrablExtension, project)
-        extension = project.extensions.getByType(GrablExtension)
+        project.extensions.create(LatteExtension.NAME, LatteExtension, project)
+        extension = project.extensions.getByType(LatteExtension)
         task = createTask()
     }
 

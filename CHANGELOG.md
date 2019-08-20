@@ -7,6 +7,9 @@ The format is inspired by
 and [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).  This project
 adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## v0.2.0 / 2019-08-20
+
+Created a Progress fork of [grabl"](https://gitlab.com/grabl/) called latte.
 
 ## v0.1.0 / 2017-12-29
 
@@ -36,7 +39,7 @@ See [grabl/grabl%"v0.0.0"](https://gitlab.com/grabl/grabl/milestones/1).
 
   * Add release management using nebula.release plugin
   * Publish plugin to the Gradle Plugins Portal as
-    [grabl](https://plugins.gradle.org/plugin/io.gitlab.grabl.grabl)
+    [latte](https://plugins.gradle.org/plugin/oe.espresso.latte.latte)
   * Build in GitLab-CI so bad commits / MRs are spotted early
   * Provide CompileAblTask, grabl extension (configuration point)
   * Add PCT tasks and types to project it's applied to

@@ -1,5 +1,5 @@
 // Copyright © 2019 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
-package io.gitlab.grabl
+package oe.espresso.latte
 
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -21,7 +21,7 @@ import java.nio.file.Paths
     overwriting output file if desired 
 
 */
-class BackupDatabase extends BaseGrablTask {
+class BackupDatabase extends BaseLatteTask {
 
     /**
     string path to backup file. required. may be absolute or relative

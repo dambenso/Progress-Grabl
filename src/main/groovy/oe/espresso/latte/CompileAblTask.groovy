@@ -1,4 +1,4 @@
-package io.gitlab.grabl
+package oe.espresso.latte
 
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileCollection.AntType
@@ -10,7 +10,7 @@ import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskAction
 
 
-class CompileAblTask extends BaseGrablSourceTask {
+class CompileAblTask extends BaseLatteSourceTask {
     /**
      * Directory to put the compiled rcode in
      *
@@ -92,7 +92,7 @@ class CompileAblTask extends BaseGrablSourceTask {
     }
 
     @Internal
-    protected GrablExtension getExt() {
-        return project.extensions.getByType(GrablExtension)
+    protected LatteExtension getExt() {
+        return project.extensions.getByType(LatteExtension)
     }
 }

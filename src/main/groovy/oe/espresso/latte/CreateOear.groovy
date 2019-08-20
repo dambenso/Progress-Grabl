@@ -1,5 +1,5 @@
 // Copyright © 2019 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
-package io.gitlab.grabl
+package oe.espresso.latte
 
 import org.gradle.api.tasks.Input
 import org.gradle.api.DefaultTask
@@ -9,7 +9,7 @@ import org.gradle.api.tasks.Internal
 
 import java.util.zip.*
 
-class CreateOear extends BaseGrablTask {
+class CreateOear extends BaseLatteTask {
 
     @Input
     String projectDir = null

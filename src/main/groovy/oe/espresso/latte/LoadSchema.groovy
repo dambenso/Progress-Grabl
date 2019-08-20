@@ -1,5 +1,5 @@
 // Copyright © 2019 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
-package io.gitlab.grabl
+package oe.espresso.latte
 
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileCollection.AntType
@@ -9,7 +9,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.Internal
 
-class LoadSchema extends BaseGrablSourceTask {
+class LoadSchema extends BaseLatteSourceTask {
 
     @Input
     String refid

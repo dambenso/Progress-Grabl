@@ -1,5 +1,5 @@
 // Copyright © 2019 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
-package io.gitlab.grabl
+package oe.espresso.latte
 
 import org.gradle.api.tasks.Input
 import org.gradle.api.DefaultTask
@@ -121,7 +121,7 @@ class DBConnection extends DefaultTask {
     }
  
     @Internal
-    protected GrablExtension getExt() {
-        return project.extensions.getByType(GrablExtension)
+    protected LatteExtension getExt() {
+        return project.extensions.getByType(LatteExtension)
     } 
 }

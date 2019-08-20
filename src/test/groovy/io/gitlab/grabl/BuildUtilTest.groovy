@@ -1,4 +1,4 @@
-package io.gitlab.grabl
+package oe.espresso.latte
 
 import java.io.File
 import org.junit.Rule
@@ -12,7 +12,7 @@ class BuildUtilTest extends Specification {
 
     def "loadDbDeps returns map loaded from JSON cache"() {
         given: "an existing cache file"
-        File cacheFile = tmpDir.newFile('grablDbDepCache.json')
+        File cacheFile = tmpDir.newFile('latteDbDepCache.json')
         cacheFile.text = '{"db1":["prog1.p"],"db1;db2":["prog2.p","prog3.p"]}'
 
         expect: "loadDbDeps to return it's parsed contents"
